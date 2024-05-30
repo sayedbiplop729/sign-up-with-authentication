@@ -1,0 +1,54 @@
+public class singupactivity extends AppCompatActivity {
+
+ActivitySingupactivityBinding binding;
+private FirebaseAuth mAuth;
+FirebaseDatabase database;
+ProgressDialog prgrsdlg;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_singupactivity);
+        binding = ActivitySingupactivityBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
+
+        mAuth = FirebaseAuth.getInstance();
+        database =FirebaseDatabase.getInstance();
+        prgrsdlg= new ProgressDialog(singupactivity.this);
+        prgrsdlg.setTitle("Creating account");
+        prgrsdlg.setMessage("we are creating your account");
+
+binding.btnsignup.setOnClickListener(new View.OnClickListener() {
+    @Override
+    public void onClick(View v) {
+        prgrsdlg.show();
+        Intent intnt =new Intent(singupactivity.this, MainActivity2.class);
+        startActivity(intnt);
+        mAuth.createUserWithEmailAndPassword(binding.edttxtemail.getText().toString(),
+                binding.edttxtpass.getText().toString()).addOnCompleteListener
+                (new OnCompleteListener<AuthResult>() {
+            @Override
+            public void onComplete(@NonNull Task<AuthResult> task) {
+                prgrsdlg.dismiss();
+if(task.isSuccessful()){
+    users user = new users(binding.edttxtnm.getText().toString(), binding.edttxtemail.getText().toString(),
+            binding.edttxtpass.getText().toString(),
+            binding.editTextNumber.getText().toString(),binding.editTextDate.getText().toString());
+    String id = task.getResult().getUser().getUid();
+    database.getReference().child("Users").child(id).setValue(user);
+
+                    Toast.makeText(singupactivity.this,
+                            "your account is created", Toast.LENGTH_SHORT).show();
+                }
+else{
+    Toast.makeText(singupactivity.this,
+            Objects.requireNonNull
+                    (task.getException()).getMessage(), Toast.LENGTH_SHORT).show();
+}
+            }
+        });
+
+    }
+});
+    }
+}
